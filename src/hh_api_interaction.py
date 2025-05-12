@@ -50,11 +50,11 @@ class HeadHunterAPI:
 
 
 
-if __name__ == '__main__':
-    hh_api = HeadHunterAPI()
-
-    try:
-        vacancies = hh_api.load_vacancies("Python")
-        print(vacancies)
-    except Exception as e:
-        print(f'Произошла ошибка: {e}')
+# if __name__ == '__main__':
+#     hh_api = HeadHunterAPI()
+#
+#     try:
+#         vacancies = hh_api.load_vacancies("Python")
+#         print(vacancies)
+#     except Exception as e:
+#         print(f'Произошла ошибка: {e}')
