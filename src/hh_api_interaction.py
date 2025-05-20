@@ -1,8 +1,11 @@
-
+#########################################################################################################
 import requests
 
+from src.logging_api import logger
+from src.base_models import JobAPI
 
-class HeadHunterAPI:
+
+class HeadHunterAPI(JobAPI):
     BASE_URL = 'http://api.hh.ru/vacancies'
 
     def __init__(self):
@@ -12,41 +15,41 @@ class HeadHunterAPI:
         """
         Метод подключения к API
         """
+        timeout = 10  # секунд
+        # Создание HTTP сессии
         self.__session = requests.Session()
-        response = self.__session.get(self.BASE_URL)
+        # Отправка GET-запроса
+        response = self.__session.get(self.BASE_URL, timeout=timeout)
+        # Проверка статуса ответа
+        if response.status_code != 200:
+            logger.error(f'response.status_code != 200: {response.status_code}')
         response.raise_for_status()
         return response
 
 
-    def load_vacancies(self, keyword):
+    def get_vacancies(self, keyword: str, amount: int=None) -> list:
         """
         Метод получения вакансий по ключевому слову
         """
+        if not keyword:
+            logger.error('Провал. Необходимо указать наименование вакансии')
+            raise ValueError('Необходимо указать наименование вакансии')
+        if amount is None:
+            amount = 100
         self._connect()
         params = {
             'text': keyword,
-            'per_page': 100,
-            'page': 2
+            'per_page': amount,
+            'page': 1,
         }
 
         response = self.__session.get(self.BASE_URL, params=params)
-        vacancies = response.json().get('items', [])
+        if response.status_code != 200:
+            logger.error(f'Ошибка подключения к API {response.status_code}')
+            raise Exception(f'Ошибка подключения к API {response.status_code}')
 
-        only_with_salary = True
-
-        return [
-            {
-                'name': vacancie.get('name'),
-                'salary': f"{vacancie.get('salary', {}).get('from')} - {vacancie.get('salary', {}).get('to')}",
-                'url': vacancie.get('url'),
-                'description': vacancie.get('snippet', {}).get('responsibility'),
-                'city': vacancie.get('area').get('name')
-            }
-            for vacancie in vacancies
-            if (vacancie.get('salary') is not None and (
-                        vacancie.get('salary', {}).get('from') is not None or vacancie.get('salary', {}).get(
-                    'to') is not None))
-        ]
+        logger.info(f'Успех. Данные с портала {self.BASE_URL} получены')
+        return response.json().get('items', [])
 
 
 
@@ -54,7 +57,9 @@ class HeadHunterAPI:
 #     hh_api = HeadHunterAPI()
 #
 #     try:
-#         vacancies = hh_api.load_vacancies("Python")
+#         vacancies = hh_api.get_vacancies('Python', 1)
 #         print(vacancies)
 #     except Exception as e:
 #         print(f'Произошла ошибка: {e}')
+
+#########################################################################################################
