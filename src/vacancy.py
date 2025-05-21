@@ -31,6 +31,7 @@ class Vacancy():
         return self.average_salary() == other.average_salary()
 
     def average_salary(self):
+        """Вычисляем среднее значение зарплаты одной вакансии"""
         # Проверяем корректность строки с зарплатой
         if self.salary is None or self.salary == "" or "none" in self.salary.lower():
             return 0  # Если зарплата не указана или не распознана, возвращаем 0

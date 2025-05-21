@@ -1,5 +1,7 @@
 import json
 import os
+from typing import List, Union
+
 from src.base_models import AbstractFileStorage
 from src.hh_api_interaction import HeadHunterAPI
 from src.iterator import VacancieIterator
@@ -24,33 +26,36 @@ class JSONSaver(AbstractFileStorage):
                 iterator = VacancieIterator(data_from_file)
                 return [Vacancy.from_dict(v) for v in iterator]
             except json.JSONDecodeError:
+                self.save_vacancies([])
                 return []
 
     def add_vacancy(self, value):
         """
         Добавляет вакансию в конец файла.
         Читает файл в переменную,
-        добавляет элемент в конец списка,
-        перезаписывает старый файл с новыми данными
+        Если передается одиночная вакансия — добавляет её,
+        если список вакансий — добавляет весь список.
         """
-        vacancies = self.load_vacancies()
-        logger.info(f'Последняя вакансия в файле: its type {type(vacancies[-1])} - {vacancies[-1]}')
-        # Если передана на вход одна вакансия
-        if isinstance(value, Vacancy):
-            logger.info(f'Вошла одна вакансия: its type {type(value)} - {value}')
-            # Добавляем одну вакансию
-            try:
-                vacancies.append(value)
-            except ValueError as e:
-                logger.error(e)
-        # Проверяем, что передан именно список вакансий
-        elif self.is_list_vacancies(value):
-            logger.info(f'Вошёл список объектов Vacancy: its type {type(value[-1])} - {value[-1]}')
-            for v in value:
-                vacancies.append(v)
+        if not value:
+            logger.error(f'Нет данных для добавления: {type(value)} - {value}')
+            return
+        vac_from_file = self.load_vacancies()
+        # Проверяем новые вакансии на уникальность
+        unique_vac = self.find_unique_vacancies(vac_from_file, value)
+        if isinstance(unique_vac, list) and len(unique_vac) > 0 and all(isinstance(v, Vacancy) for v in unique_vac):
+            logger.info(f'Добавляется список вакансий: {type(unique_vac[-1])} - {unique_vac[-1]}')
+            vac_from_file.extend(unique_vac)
+        elif not unique_vac:
+            logger.info(f'Нет уникальных вакансий для добавления: {type(value)} - {value}')
+            return
+        else:
+            logger.error(f'Неверный формат данных: {type(value)} - {value}')
         # Сохраняем
-        logger.info(f'Исходящие данные для сохранения: its type {type(vacancies[-1])} - {vacancies[-1]}')
-        self.save_list_vacancies(list(vacancies))
+        if vac_from_file:
+            logger.info(f'Исходящие данные для сохранения: its type {type(vac_from_file[-1])} - {vac_from_file[-1]}')
+            self.save_list_vacancies(list(vac_from_file))
+        else:
+            logger.error(f'Для сохранения нечего передавать?!!!: its type {type(vac_from_file[-1])} - {vac_from_file[-1]}')
 
     def save_vacancies(self, json_vacancies):
         """ Перезаписывает файл входящими json-данными """
@@ -59,16 +64,19 @@ class JSONSaver(AbstractFileStorage):
 
     def save_list_vacancies(self, list_vacancies):
         """ Перезаписывает файл входящим списком вакансий """
-
-        # Проверяем, что передан именно список объектов вакансий
+        if not list_vacancies or len(list_vacancies) == 0:
+            logger.info(f'Передан пустой список, действие отменено {type(list_vacancies)} - {list_vacancies}')
+            return
         if isinstance(list_vacancies[0], Vacancy):
-            logger.info(f'Вошёл список объектов Vacancy: its type {type(list_vacancies[-1])} - {list_vacancies[-1]}')
-            # Сериализуем объекты вакансий в список словарей
+            if list_vacancies:
+                logger.info(f'Вошёл список объектов Vacancy: its type {type(list_vacancies[-1])} - {list_vacancies[-1]}')
+            logger.info('Сериализуем объекты вакансий в список словарей')
             serialized_data = [vacancy.to_dict() for vacancy in list_vacancies]
         else:
-            logger.info(f'Вошёл список словарей: its type {type(list_vacancies[-1])} - {list_vacancies[-1]}')
+            if list_vacancies:
+                logger.info(f'Вошёл список словарей: its type {type(list_vacancies[-1])} - {list_vacancies[-1]}')
             serialized_data = list_vacancies
-        # Перезаписываем файл данными
+        logger.info('Перезаписываем файл данными')
         with open(self.__file_name, 'w', encoding='utf-8') as file:
             json.dump({'vacancies': serialized_data}, file, ensure_ascii=False, indent=4)
 
@@ -76,23 +84,55 @@ class JSONSaver(AbstractFileStorage):
         """ Удаляет из файла по входящему названию """
         global updated_vacancies
         vacancies = self.load_vacancies()
-        # Проверяем формат данных и выполняем удаление соответственно
+        logger.info('Проверяем формат данных и выполняем удаление соответственно')
         if isinstance(vacancies[0], Vacancy):
             updated_vacancies = [v for v in vacancies if v != value]
         elif isinstance(vacancies, list):
-            # Проверяем типы элементов списка
+            logger.info('Проверяем типы элементов списка')
             if all(isinstance(v, dict) for v in vacancies):
-                # Формат данных: список словарей
+                logger.info('Формат данных: список словарей')
                 updated_vacancies = [v for v in vacancies if v.get('name') != value]
             elif all(isinstance(v, str) for v in vacancies):
-                # Формат данных: список строк
+                logger.info('Формат данных: список строк')
                 updated_vacancies = [v for v in vacancies if value not in v]
             else:
-                # Смешанный формат или неизвестный тип данных
+                logger.error('Смешанный формат или неизвестный тип данных')
                 raise ValueError("Недопустимый формат данных вакансий")
         else:
+            logger.error("Получены недопустимые данные, ожидался список")
             raise ValueError("Получены недопустимые данные, ожидался список")
-        self.save_list_vacancies(updated_vacancies)
+        if updated_vacancies:
+            self.save_list_vacancies(updated_vacancies)
+        else:
+            self.save_vacancies([])
+            logger.info('Список пуст, был удален последний элемент')
+
+    @staticmethod
+    def find_unique_vacancies(existing_vacancies: List[Vacancy], new_vacancies: Union[List[Vacancy], Vacancy]) -> List[
+        Vacancy]:
+        """
+        Сравнивает списки и возвращает из второго списка список уникальных вакансий.
+        """
+        if isinstance(new_vacancies, Vacancy):
+            logger.info(f'Пришёл одиночный объект для сравнения {new_vacancies}')
+            new_vacancies = [new_vacancies]
+        if not existing_vacancies:
+            logger.error('Если эталонный список пуст возвращаем список новых вакансий без изменения')
+            return new_vacancies
+        if not new_vacancies:
+            logger.error(f'Пришёл пустой список для сравнения {new_vacancies}')
+            return []
+        logger.info('Получаем подписи всех существующих вакансий')
+        signatures_from_existing_vacancies = {
+            f"{v.name}-{v.url}"
+            for v in existing_vacancies
+        }
+        logger.info('Фильтруем новые вакансии, оставляя только уникальные')
+        unique_vacancies = [
+            v for v in new_vacancies
+            if f"{v.name}-{v.url}" not in signatures_from_existing_vacancies
+        ]
+        return unique_vacancies
 
     @staticmethod
     def is_list_vacancies(list_vacancies):
@@ -135,11 +175,16 @@ class JSONSaver(AbstractFileStorage):
         либо предварительно загрузив из файла.
         Поиск ведется по всему объекту вакансии.
         """
+
         # Нормализуем разные варианты критерия для фильтрации
-        if isinstance(criteria, str):
+        if isinstance(criteria, str) and len(criteria) > 0:
             normalized_criteria = criteria.strip().lower()
-        elif isinstance(criteria, list):
+        elif isinstance(criteria, list) and len(criteria) > 0:
             normalized_criteria = [c.strip().lower() for c in criteria]
+        elif isinstance(criteria, str) and len(criteria) == 0 and isinstance(vacancies_list, list):
+            return vacancies_list
+        elif isinstance(criteria, list) and len(criteria) == 0 and isinstance(vacancies_list, list):
+            return vacancies_list
         else:
             raise TypeError("Критерии должны быть либо строкой, либо списком")
 
@@ -183,18 +228,21 @@ class JSONSaver(AbstractFileStorage):
 
     @staticmethod
     def sort_vacancies(vacancies):
-        # Сортируем вакансии по средней зарплате
+        """Сортируем вакансии по убыванию среднего уровня зарплаты"""
         return sorted(vacancies, key=lambda v: v.average_salary(), reverse=True)
 
     @staticmethod
     def get_top_vacancies(sorted_vacancies, top_n):
-        # Берём первые top_n вакансий из отсортированных
+        """Берём первые top_n вакансий из отсортированных"""
         return sorted_vacancies[:min(len(sorted_vacancies), top_n)]
 
     @staticmethod
     def get_vacancies_in_salary_range(vacancies, salary_range):
         """ Фильтрует по признаку зарплата в указанном диапазоне """
-        # Преобразуем границы диапазона в числа
+        # Проверяем что на вход пришли данные.
+        if not salary_range:
+            return [v for v in vacancies if v.average_salary() is not None]
+        # Преобразуем границы диапазона в числа.
         min_salary, max_salary = map(float, salary_range.split('-'))
         # Отбираем вакансии, попадающие в указанный диапазон зарплат
         return [
@@ -203,34 +251,34 @@ class JSONSaver(AbstractFileStorage):
 
     @staticmethod
     def print_vacancies(list_vacancies):
-        # Выводим полученный список построчно
+        """Выводим полученный список построчно"""
         if isinstance(list_vacancies, list):
             for vacancy in list_vacancies:
                 print(vacancy)
 
 
-if __name__ == '__main__':
-    hh_api = HeadHunterAPI()
-    vacancies = ''
-    list_vacancies = []
-    try:
-        vacancies = hh_api.get_vacancies("Python", 10)
-    except Exception as e:
-        print(f'Произошла ошибка: {e}')
-
+# if __name__ == '__main__':
+#     hh_api = HeadHunterAPI()
+#     vacancies = ''
+#     list_vacancies = []
+#     try:
+#         vacancies = hh_api.get_vacancies("Python", 10)
+#     except Exception as e:
+#         print(f'Произошла ошибка: {e}')
+#
     # print(vacancies)
-    print('1' * 100)
-
-    try:
-        list_vacancies = JSONSaver.cast_to_object_list(vacancies)
-    except Exception as e:
-        print(f'Произошла ошибка: {e}')
-
+    # print('1' * 100)
+    #
+    # try:
+    #     list_vacancies = JSONSaver.cast_to_object_list(vacancies)
+    # except Exception as e:
+    #     print(f'Произошла ошибка: {e}')
+    #
     # iterator = VacancieIterator(list_vacancies)
     # print(next(iterator))
     # print(list_vacancies)
-    print('2' * 100)
-
+    # print('2' * 100)
+    #
     # vacancie = Vacancy(
     #     "Python Developer",
     #     "100000-150000 руб.",
@@ -238,10 +286,10 @@ if __name__ == '__main__':
     #     "Требования: опыт работы от 3 лет...",
     #     "Москва",
     # )
-    json_saver = JSONSaver()
+    # json_saver = JSONSaver()
     # json_saver.save_vacancies(vacancies)
-    json_saver.save_list_vacancies(list_vacancies)
-    print(json_saver.load_vacancies())
+#     json_saver.save_list_vacancies(list_vacancies)
+#     print(json_saver.load_vacancies())
     # json_saver.add_vacancy(vacancie)
     # json_saver.delete_vacancy('Junior Devops')
     #

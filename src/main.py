@@ -31,7 +31,14 @@ json_saver.delete_vacancy(vacancy)
 def user_interaction():
     platforms = ["HeadHunter"]
     search_query = input("Введите поисковый запрос: ")
-    top_n = int(input("Введите количество вакансий для вывода в топ N: "))
+    while True:
+        user_input = input("Введите количество вакансий для вывода в топ N: ")
+        try:
+            if user_input != '0':
+                top_n = abs(int(user_input))
+                break  # Выход из цикла, если ввод правильный
+        except ValueError:
+            print("Некорректный ввод! Введите целое положительное число.")
     filter_words = input("Введите ключевые слова для фильтрации вакансий: ").split()
     salary_range = input("Введите диапазон зарплат: ") # Пример: 100000-150000
 
