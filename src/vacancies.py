@@ -249,63 +249,63 @@ class JSONSaver(AbstractFileStorage):
                 print(vacancy)
 
 
-if __name__ == '__main__':
-    # hh_api = HeadHunterAPI()
-    # vacancies = ''
-    # list_vacancies = []
-    # try:
-    #     vacancies = hh_api.get_vacancies("Python", 10)
-    # except Exception as e:
-    #     print(f'Произошла ошибка: {e}')
-    #
-    # print(vacancies)
-    # print('1' * 100)
-    #
-    # try:
-    #     list_vacancies = JSONSaver.cast_to_object_list(vacancies)
-    # except Exception as e:
-    #     print(f'Произошла ошибка: {e}')
-    #
-    # iterator = VacanciesIterator(list_vacancies)
-    # print(next(iterator))
-    # print(list_vacancies)
-    # print('2' * 100)
-    #
-    # vacancie = Vacancy(
-    #     "Python Developer",
-    #     "100000-150000 руб.",
-    #     "<https://hh.ru/vacancy/123456>",
-    #     "Требования: опыт работы от 3 лет...",
-    #     "Москва",
-    # )
-    # json_saver = JSONSaver()
-    # json_saver.save_vacancies(vacancies)
-    # json_saver.save_list_vacancies(list_vacancies)
-    # print(json_saver.load_vacancies())
-    # json_saver.add_vacancy(vacancie)
-    # json_saver.delete_vacancy('Junior Devops')
-
-    # Пример создания вакансий
-    vacancy1 = Vacancy("Python-разработчик", "70000-100000", "https://hh.ru/vacancy/1",
-                       "Требуется опыт разработки на Python", "Москва")
-    vacancy2 = Vacancy("Frontend-разработчик", "80000-120000", "https://hh.ru/vacancy/2", "Требуются знания React.js",
-                       "Санкт-Петербург")
-
-    # Добавляем вакансии в хранилище
-    json_saver = JSONSaver()
-    # json_saver.save_vacancies([vacancy1.__dict__, vacancy2.__dict__])
-    #
-    # # Поиск вакансий в диапазоне зарплат
-    # result = json_saver.get_vacancies_in_salary_range(75000, 110000)
-    # for vacancy in result:
-    #     print(vacancy)
-
-    json_saver.save_vacancies([])
-    json_saver.add_vacancy([vacancy1, vacancy2])
-
-    filtered_vacancies = json_saver.filter_by_criteria('Санкт-Петербург')
-
-    print(filtered_vacancies)
+# if __name__ == '__main__':
+#     # hh_api = HeadHunterAPI()
+#     # vacancies = ''
+#     # list_vacancies = []
+#     # try:
+#     #     vacancies = hh_api.get_vacancies("Python", 10)
+#     # except Exception as e:
+#     #     print(f'Произошла ошибка: {e}')
+#     #
+#     # print(vacancies)
+#     # print('1' * 100)
+#     #
+#     # try:
+#     #     list_vacancies = JSONSaver.cast_to_object_list(vacancies)
+#     # except Exception as e:
+#     #     print(f'Произошла ошибка: {e}')
+#     #
+#     # iterator = VacanciesIterator(list_vacancies)
+#     # print(next(iterator))
+#     # print(list_vacancies)
+#     # print('2' * 100)
+#     #
+#     # vacancie = Vacancy(
+#     #     "Python Developer",
+#     #     "100000-150000 руб.",
+#     #     "<https://hh.ru/vacancy/123456>",
+#     #     "Требования: опыт работы от 3 лет...",
+#     #     "Москва",
+#     # )
+#     # json_saver = JSONSaver()
+#     # json_saver.save_vacancies(vacancies)
+#     # json_saver.save_list_vacancies(list_vacancies)
+#     # print(json_saver.load_vacancies())
+#     # json_saver.add_vacancy(vacancie)
+#     # json_saver.delete_vacancy('Junior Devops')
+#
+#     # Пример создания вакансий
+#     vacancy1 = Vacancy("Python-разработчик", "70000-100000", "https://hh.ru/vacancy/1",
+#                        "Требуется опыт разработки на Python", "Москва")
+#     vacancy2 = Vacancy("Frontend-разработчик", "80000-120000", "https://hh.ru/vacancy/2", "Требуются знания React.js",
+#                        "Санкт-Петербург")
+#
+#     # Добавляем вакансии в хранилище
+#     json_saver = JSONSaver()
+#     # json_saver.save_vacancies([vacancy1.__dict__, vacancy2.__dict__])
+#     #
+#     # # Поиск вакансий в диапазоне зарплат
+#     # result = json_saver.get_vacancies_in_salary_range(75000, 110000)
+#     # for vacancy in result:
+#     #     print(vacancy)
+#
+#     json_saver.save_vacancies([])
+#     json_saver.add_vacancy([vacancy1, vacancy2])
+#
+#     filtered_vacancies = json_saver.filter_by_criteria('Санкт-Петербург')
+#
+#     print(filtered_vacancies)
 
 
 ############################################################################################
