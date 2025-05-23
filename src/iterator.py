@@ -1,18 +1,15 @@
 #########################################################################################################
-
-
-class VacancieIterator:
+class VacanciesIterator:
     """
         Принимает список вакансий и при переборе выдает по одной
-        либо с помощью метода next, либо при внешней итерации VacancieIterator(list)
-
+        либо с помощью метода next, либо при внешней итерации VacanciesIterator(list)
     """
 
     def __init__(self, vacancies_list: list) -> None:
         self.vacancies = vacancies_list
         self.index = 0
 
-    def __iter__(self) -> "VacancieIterator":
+    def __iter__(self) -> "VacanciesIterator":
         return self
 
     def __next__(self) -> str:
@@ -20,9 +17,9 @@ class VacancieIterator:
         # if not isinstance(self, list) or not all(isinstance(item, "Vacancy") for item in self):
         #     raise TypeError("Ожидается список объектов класса Vacancy")
         if self.index < len(self.vacancies):
-            vacancie = self.vacancies[self.index]
+            vacancy = self.vacancies[self.index]
             self.index += 1
-            return vacancie
+            return vacancy
         else:
             raise StopIteration
 
@@ -38,11 +35,11 @@ class VacancieIterator:
 #
 #     # print(vacancies)
 #
-#     iterator = VacancieIterator(vacancies)
+#     iterator = VacanciesIterator(vacancies)
 #     print(next(iterator))
 #     print(next(iterator))
 #
-#     for vacancie in iterator:
-#         print(vacancie)
+#     for vacancy in iterator:
+#         print(vacancy)
 
 #########################################################################################################

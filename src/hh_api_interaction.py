@@ -8,7 +8,7 @@ from src.base_models import JobAPI
 class HeadHunterAPI(JobAPI):
     BASE_URL = 'http://api.hh.ru/vacancies'
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.__session = None
 
     def _connect(self):
@@ -36,19 +36,22 @@ class HeadHunterAPI(JobAPI):
             raise ValueError('Необходимо указать наименование вакансии')
         if amount is None:
             amount = 100
+        # Запускаем сессию
         self._connect()
+        # Создаем параметры для запроса
         params = {
             'text': keyword,
             'per_page': amount,
             'page': 1,
         }
-
+        # Получаем данные по запросу
         response = self.__session.get(self.BASE_URL, params=params)
         if response.status_code != 200:
             logger.error(f'Ошибка подключения к API {response.status_code}')
             raise Exception(f'Ошибка подключения к API {response.status_code}')
 
         logger.info(f'Успех. Данные с портала {self.BASE_URL} получены')
+        # Возвращаем данные хранящиеся по ключу 'items' или пустой список если нет такого ключа
         return response.json().get('items', [])
 
 
