@@ -1,10 +1,11 @@
 import abc
 
+
 class JobAPI(abc.ABC):
     @abc.abstractmethod
     def _connect(self):
         """
-            Метод подключения к API
+        Метод подключения к API
         """
         pass
 

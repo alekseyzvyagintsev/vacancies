@@ -1,6 +1,7 @@
 ######################################################################################
+from unittest.mock import Mock, patch
+
 import pytest
-from unittest.mock import patch, Mock
 
 from src.hh_api_interaction import HeadHunterAPI
 
@@ -28,7 +29,7 @@ def test_get_vacancies_success(mock_session):
     mock_response.status_code = 200
     mock_session.return_value.get.return_value = mock_response
     api = HeadHunterAPI()
-    vacancies = api.get_vacancies(keyword='Python разработчик')
+    vacancies = api.get_vacancies(keyword="Python разработчик")
     assert len(vacancies) > 0
 
 
@@ -36,8 +37,8 @@ def test_get_vacancies_success(mock_session):
 def test_get_vacancies_invalid_keyword(mock_session):
     """Тест передачи неправильного значения параметра keyword."""
     api = HeadHunterAPI()
-    with pytest.raises(ValueError, match=r'Необходимо указать наименование вакансии'):
-        api.get_vacancies(keyword='')
+    with pytest.raises(ValueError, match=r"Необходимо указать наименование вакансии"):
+        api.get_vacancies(keyword="")
 
 
 @patch("requests.Session")
@@ -46,8 +47,8 @@ def test_get_vacancies_server_error(mock_session):
     mock_response = Mock(status_code=500)
     mock_session.return_value.get.return_value = mock_response
     api = HeadHunterAPI()
-    with pytest.raises(Exception, match=r'Ошибка подключения к API 500'):
-        api.get_vacancies(keyword='Developer')
+    with pytest.raises(Exception, match=r"Ошибка подключения к API 500"):
+        api.get_vacancies(keyword="Developer")
 
 
 @patch("requests.Session")
@@ -57,7 +58,7 @@ def test_get_vacancies_no_items(mock_session):
     mock_response.status_code = 200
     mock_session.return_value.get.return_value = mock_response
     api = HeadHunterAPI()
-    vacancies = api.get_vacancies(keyword='не существующее название')
+    vacancies = api.get_vacancies(keyword="не существующее название")
     assert vacancies == [], "При отсутствии вакансий ожидался пустой список"
 
 
