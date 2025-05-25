@@ -24,22 +24,4 @@ class VacanciesIterator:
             raise StopIteration
 
 
-# if __name__ == '__main__':
-#     from src.hh_api_interaction import HeadHunterAPI
-#     hh_api = HeadHunterAPI()
-#     vacancies = []
-#     try:
-#         vacancies = hh_api.load_vacancies("Python")
-#     except Exception as e:
-#         print(f'Произошла ошибка: {e}')
-#
-#     # print(vacancies)
-#
-#     iterator = VacanciesIterator(vacancies)
-#     print(next(iterator))
-#     print(next(iterator))
-#
-#     for vacancy in iterator:
-#         print(vacancy)
-
 #########################################################################################################

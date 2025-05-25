@@ -1,12 +1,11 @@
 ############################################################################################
 import re
 
-from src.hh_api_interaction import HeadHunterAPI
 from src.logging_vacancy import logger
 
 
 class Vacancy:
-    __slots__ = ['name', 'salary', '_url', 'description', 'city']
+    __slots__ = ["name", "salary", "_url", "description", "city"]
 
     def __init__(self, name, salary, url, description, city) -> None:
         self._validate_attributes(name, salary, url, description, city)
@@ -29,7 +28,7 @@ class Vacancy:
         """Приватный метод для проверки правильности значений атрибутов"""
         if not isinstance(name, str) or not name.strip():
             raise ValueError("Имя вакансии должно быть непустым текстом.")
-        if not isinstance(url, str) or not url.startswith(('http://', 'https://')):
+        if not isinstance(url, str) or not url.startswith(("http://", "https://")):
             raise ValueError("URL должен начинаться с http:// или https://.")
         if not isinstance(description, str) or not description.strip():
             raise ValueError("Описание должно быть непустым текстом.")
@@ -84,17 +83,6 @@ class Vacancy:
     @classmethod
     def from_dict(cls, data):
         return cls(**data)
-
-
-if __name__ == "__main__":
-    hh_api = HeadHunterAPI()
-    vacancies = ""
-    try:
-        vacancies = hh_api.get_vacancies("Python")
-        # print(vacancies)
-        # print('1' * 100)
-    except Exception as e:
-        print(f"Произошла ошибка: {e}")
 
 
 ############################################################################################

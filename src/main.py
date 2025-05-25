@@ -1,3 +1,4 @@
+########################################################################
 from src.hh_api_interaction import HeadHunterAPI
 from src.vacancies import JSONSaver
 from src.vacancy import Vacancy
@@ -15,7 +16,7 @@ vacancies_list = JSONSaver.cast_to_object_list(hh_vacancies)
 vacancy = Vacancy(
     "Python Developer",
     "100 000-150 000 руб.",
-    "<https://hh.ru/vacancy/123456>",
+    "https://hh.ru/vacancy/123456",
     "Требования: опыт работы от 3 лет...",
     "Москва",
 )
@@ -53,3 +54,5 @@ def user_interaction():
 
 if __name__ == "__main__":
     user_interaction()
+
+########################################################################

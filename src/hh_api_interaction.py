@@ -54,13 +54,4 @@ class HeadHunterAPI(JobAPI):
         return response.json().get("items", [])
 
 
-# if __name__ == '__main__':
-#     hh_api = HeadHunterAPI()
-#
-#     try:
-#         vacancies = hh_api.get_vacancies('Python', 1)
-#         print(vacancies)
-#     except Exception as e:
-#         print(f'Произошла ошибка: {e}')
-
 #########################################################################################################
