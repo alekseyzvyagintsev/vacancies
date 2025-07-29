@@ -1,0 +1,11 @@
+{
+    "vacancies": [
+        {
+            "name": "Тестовая Вакансия",
+            "salary": "100000-200000 RUR.",
+            "url": "http://example.com/test-job",
+            "description": "Описание вакансии",
+            "city": "Москва"
+        }
+    ]
+}
