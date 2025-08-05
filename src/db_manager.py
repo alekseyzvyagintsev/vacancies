@@ -87,7 +87,7 @@ class CRUDTables:
                                 employer_id INTEGER REFERENCES employers(employer_id) ON DELETE CASCADE
                             );
                             """
-                )
+                            )
             print("Таблицы созданы")
         except psycopg2.Error as e:
             print(str(e))
@@ -114,13 +114,13 @@ class CRUDTables:
                                 VALUES (%s, %s, %s) ON CONFLICT DO NOTHING;
                                 """,
                                 (obj.employer, obj.employer_id, obj.vacancies_url),
-                    )
+                                )
                     cur.execute("""
                                 INSERT INTO vacancies (title, salary, description, city, url, employer_id)
                                 VALUES (%s, %s, %s, %s, %s, %s);
                                 """,
                                 (obj.name, obj.salary, obj.description, obj.city, obj.url, obj.employer_id),
-                    )
+                                )
 
                 # Завершение транзакции
                 cur.execute("COMMIT;")
@@ -155,7 +155,7 @@ class DataAnalyzer:
                             GROUP BY e.employer_id, e.employer
                             ORDER BY e.employer ASC;
                             """
-                )
+                            )
                 rows = cur.fetchall()
                 for row in rows:
                     result.append({"company": row[0], "vacancies_count": row[1]})
@@ -172,12 +172,12 @@ class DataAnalyzer:
             with self.connection_manager.get_connection().cursor() as cur:
                 # Выполняем запрос, который объединяет таблицы vacancies и employers
                 cur.execute("""
-                            SELECT e.employer, v.title, v.salary, v.url      
+                            SELECT e.employer, v.title, v.salary, v.url
                             FROM vacancies v
                                      INNER JOIN employers e ON v.employer_id = e.employer_id
                             ORDER BY e.employer ASC;
                             """
-                )
+                            )
                 rows = cur.fetchall()
                 for row in rows:
                     result.append({"company": row[0], "job_title": row[1], "salary": row[2], "link": row[3]})
@@ -196,20 +196,19 @@ class DataAnalyzer:
             with self.connection_manager.get_connection().cursor() as cur:
                 # Получаем все вакансии из базы данных
                 cur.execute("""
-                            SELECT v.title, 
-                                   v.salary, 
-                                   v.url, 
-                                   v.description, 
-                                   v.city, 
-                                   e.employer, 
-                                   e.employer_id, 
+                            SELECT v.title,
+                                   v.salary,
+                                   v.url,
+                                   v.description,
+                                   v.city,
+                                   e.employer,
+                                   e.employer_id,
                                    e.url
-                                    
                             FROM vacancies v
                                      INNER JOIN employers e ON v.employer_id = e.employer_id
                             ORDER BY e.employer ASC;
                             """
-                )
+                            )
                 all_vacancies = cur.fetchall()
 
             # Перебираем каждую вакансию и применяем метод average_salary
@@ -241,20 +240,19 @@ class DataAnalyzer:
         try:
             with self.connection_manager.get_connection().cursor() as cur:
                 cur.execute("""
-                            SELECT v.title, 
-                                   v.salary, 
-                                   v.url, 
-                                   v.description, 
-                                   v.city, 
-                                   e.employer, 
-                                   e.employer_id, 
+                            SELECT v.title,
+                                   v.salary,
+                                   v.url,
+                                   v.description,
+                                   v.city,
+                                   e.employer,
+                                   e.employer_id,
                                    e.url
-                                    
                             FROM vacancies v
                                      INNER JOIN employers e ON v.employer_id = e.employer_id
                             ORDER BY e.employer ASC;
                             """
-                )
+                            )
                 all_vacancies = cur.fetchall()
 
             for row in all_vacancies:
@@ -280,8 +278,7 @@ class DataAnalyzer:
                             FROM vacancies
                             WHERE LOWER(title) LIKE %s;
                             """, (f"%{keyword.lower()}%",),
-                )
-                    
+                            )
 
                 rows = cur.fetchall()
                 for row in rows:

@@ -10,12 +10,12 @@ from src.db_manager import DBManager
 load_dotenv(override=True)
 
 db_params = {
-        'host': os.getenv('HOST'),
-        'database': os.getenv('NAME'),
-        'user': os.getenv('USER'),
-        'password': os.getenv('PASSWORD'),
-        'port': os.getenv('PORT'),
-    }
+    'host': os.getenv('HOST'),
+    'database': os.getenv('NAME'),
+    'user': os.getenv('USER'),
+    'password': os.getenv('PASSWORD'),
+    'port': os.getenv('PORT'),
+}
 
 # Экземпляр класса для работы с базой данных
 dbm = DBManager(db_params)
@@ -30,6 +30,8 @@ hh_api = HeadHunterAPI()
 json_data = JSONSaver()
 
 # Функция для взаимодействия с пользователем
+
+
 def user_interaction():
 
     # Получение вакансий с hh.ru в формате JSON
@@ -47,7 +49,7 @@ def user_interaction():
                 break  # Выход из цикла, если ввод правильный
             elif 0 < int(user_input) < 10:
                 top_n = 10
-                break # Выход из цикла, если ввода не последовало
+                break  # Выход из цикла, если ввода не последовало
         except ValueError:
             print("Некорректный ввод! Введите целое положительное число.")
     # filter_words = input("Введите ключевые слова для фильтрации вакансий: ")
@@ -62,7 +64,7 @@ def user_interaction():
     # json_data.print_vacancies(top_vacancies)
     for vacancy in top_vacancies:
         # Получение вакансий работодателя с hh.ru в формате JSON
-        employer_vacancies = hh_api.get_vacancies(url = vacancy.vacancies_url)
+        employer_vacancies = hh_api.get_vacancies(url=vacancy.vacancies_url)
         # Преобразование набора данных из JSON в список объектов
         emp_vac_list = json_data.cast_to_object_list(employer_vacancies)
         # json_data.print_vacancies(emp_vac_list)
@@ -117,6 +119,7 @@ def user_interaction():
 
         except ValueError:
             print("\nНекорректный ввод! Введите целое положительное число.")
+
 
 # Закрытие соединения с базой данных
 dbm.finalize()
