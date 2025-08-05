@@ -6,6 +6,7 @@ from src.vacancy import Vacancy
 
 class ConnectionManager:
     """Метод для работы с подключением к базе данных"""
+
     def __init__(self, db_params: dict) -> None:
         self.db_params = db_params
         self.conn = None
@@ -27,6 +28,7 @@ class ConnectionManager:
 
 class DBCreate:
     """Метод для создания базы данных"""
+
     def __init__(self, connection_manager: ConnectionManager) -> None:
         self.connection_manager = connection_manager
 
@@ -53,7 +55,9 @@ def ensure_connected(func):
         if self.connection_manager.conn.closed != 0:
             self.connection_manager.connect()
         return func(self, *args, **kwargs)
+
     return wrapper
+
 
 class CRUDTables:
     """Класс для работы с таблицами базы банных"""
@@ -67,23 +71,22 @@ class CRUDTables:
         """
         try:
             with self.connection_manager.get_connection().cursor() as cur:
-                cur.execute(
-                    """
-                    CREATE TABLE IF NOT EXISTS employers (
-                        employer_id INTEGER PRIMARY KEY,
-                        employer VARCHAR(200) NOT NULL,
-                        url VARCHAR(250) NOT NULL
-                    );
-                    CREATE TABLE IF NOT EXISTS vacancies (
-                        id SERIAL PRIMARY KEY,
-                        title VARCHAR(250) NOT NULL,
-                        salary VARCHAR(20) NOT NULL,
-                        description TEXT,
-                        city VARCHAR(100) NOT NULL,
-                        url VARCHAR(250) NOT NULL,
-                        employer_id INTEGER REFERENCES employers(employer_id) ON DELETE CASCADE
-                    );
-                """
+                cur.execute("""
+                            CREATE TABLE IF NOT EXISTS employers (
+                                employer_id INTEGER PRIMARY KEY,
+                                employer VARCHAR(200) NOT NULL,
+                                url VARCHAR(250) NOT NULL
+                            );
+                            CREATE TABLE IF NOT EXISTS vacancies (
+                                id SERIAL PRIMARY KEY,
+                                title VARCHAR(250) NOT NULL,
+                                salary VARCHAR(20) NOT NULL,
+                                description TEXT,
+                                city VARCHAR(100) NOT NULL,
+                                url VARCHAR(250) NOT NULL,
+                                employer_id INTEGER REFERENCES employers(employer_id) ON DELETE CASCADE
+                            );
+                            """
                 )
             print("Таблицы созданы")
         except psycopg2.Error as e:
@@ -109,12 +112,15 @@ class CRUDTables:
                     cur.execute("""
                                 INSERT INTO employers (employer, employer_id, url)
                                 VALUES (%s, %s, %s) ON CONFLICT DO NOTHING;
-                                """, (obj.employer, obj.employer_id, obj.vacancies_url))
-
-                cur.execute("""
-                            INSERT INTO vacancies (title, salary, description, city, url, employer_id)
-                            VALUES (%s, %s, %s, %s, %s, %s);
-                            """, (obj.name, obj.salary, obj.description, obj.city, obj.url, obj.employer_id))
+                                """,
+                                (obj.employer, obj.employer_id, obj.vacancies_url),
+                    )
+                    cur.execute("""
+                                INSERT INTO vacancies (title, salary, description, city, url, employer_id)
+                                VALUES (%s, %s, %s, %s, %s, %s);
+                                """,
+                                (obj.name, obj.salary, obj.description, obj.city, obj.url, obj.employer_id),
+                    )
 
                 # Завершение транзакции
                 cur.execute("COMMIT;")
@@ -129,6 +135,7 @@ class CRUDTables:
 
 class DataAnalyzer:
     """Метод для работы с данными таблиц базы данных"""
+
     def __init__(self, connection_manager: ConnectionManager) -> None:
         self.connection_manager = connection_manager
 
@@ -147,13 +154,11 @@ class DataAnalyzer:
                                      LEFT JOIN vacancies v ON e.employer_id = v.employer_id
                             GROUP BY e.employer_id, e.employer
                             ORDER BY e.employer ASC;
-                            """)
+                            """
+                )
                 rows = cur.fetchall()
                 for row in rows:
-                    result.append({
-                        "company": row[0],
-                        "vacancies_count": row[1]
-                    })
+                    result.append({"company": row[0], "vacancies_count": row[1]})
         except Exception as e:
             print(f"Ошибка при выполнении запроса: {str(e)}")
         return result
@@ -171,15 +176,11 @@ class DataAnalyzer:
                             FROM vacancies v
                                      INNER JOIN employers e ON v.employer_id = e.employer_id
                             ORDER BY e.employer ASC;
-                            """)
+                            """
+                )
                 rows = cur.fetchall()
                 for row in rows:
-                    result.append({
-                        "company": row[0],
-                        "job_title": row[1],
-                        "salary": row[2],
-                        "link": row[3]
-                    })
+                    result.append({"company": row[0], "job_title": row[1], "salary": row[2], "link": row[3]})
         except Exception as e:
             print(f"Ошибка при выполнении запроса: {str(e)}")
         return result
@@ -207,7 +208,8 @@ class DataAnalyzer:
                             FROM vacancies v
                                      INNER JOIN employers e ON v.employer_id = e.employer_id
                             ORDER BY e.employer ASC;
-                            """)
+                            """
+                )
                 all_vacancies = cur.fetchall()
 
             # Перебираем каждую вакансию и применяем метод average_salary
@@ -251,7 +253,8 @@ class DataAnalyzer:
                             FROM vacancies v
                                      INNER JOIN employers e ON v.employer_id = e.employer_id
                             ORDER BY e.employer ASC;
-                            """)
+                            """
+                )
                 all_vacancies = cur.fetchall()
 
             for row in all_vacancies:
@@ -276,7 +279,9 @@ class DataAnalyzer:
                             SELECT title, salary, url
                             FROM vacancies
                             WHERE LOWER(title) LIKE %s;
-                            """, (f"%{keyword.lower()}%",))
+                            """, (f"%{keyword.lower()}%",),
+                )
+                    
 
                 rows = cur.fetchall()
                 for row in rows:
@@ -284,7 +289,6 @@ class DataAnalyzer:
         except Exception as e:
             print(f"Ошибка при выполнении запроса: {str(e)}")
         return result
-
 
 
 class DBManager:
