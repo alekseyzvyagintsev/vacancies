@@ -1,57 +1,72 @@
+###############################################################################################
 import psycopg2
 
-from src.base_models import DBInteraction
 from src.vacancy import Vacancy
 
 
-class DBManager(DBInteraction):
+class ConnectionManager:
+    """Метод для работы с подключением к базе данных"""
     def __init__(self, db_params: dict) -> None:
-        # Сохраняем параметры
         self.db_params = db_params
         self.conn = None
 
+    def connect(self) -> None:
+        try:
+            self.conn = psycopg2.connect(**self.db_params)
+            self.conn.autocommit = True
+        except psycopg2.Error as e:
+            raise Exception(f"Ошибка подключения к базе данных: {str(e)}")
+
+    def close_connection(self) -> None:
+        if self.conn is not None:
+            self.conn.close()
+
+    def get_connection(self):
+        return self.conn
+
+
+class DBCreate:
+    """Метод для создания базы данных"""
+    def __init__(self, connection_manager: ConnectionManager) -> None:
+        self.connection_manager = connection_manager
+
     def create_db(self) -> None:
-        """
-        Метод для создания базы данных
-        """
-        # Временное подключение к базе данных postgres
-        temp_params = self.db_params.copy()
+        # Подключаемся временно к базе данных "postgres"
+        temp_params = self.connection_manager.db_params.copy()
         temp_params["database"] = "postgres"
+
         conn = psycopg2.connect(**temp_params)
         conn.autocommit = True
         try:
             with conn.cursor() as cur:
-                cur.execute(f"DROP DATABASE IF EXISTS {self.db_params['database']};")
-                cur.execute(f"CREATE DATABASE {self.db_params['database']} ENCODING 'UTF8';")
-            print(f"База данных {self.db_params['database']} создана.")
+                cur.execute(f"DROP DATABASE IF EXISTS {self.connection_manager.db_params['database']};")
+                cur.execute(f"CREATE DATABASE {self.connection_manager.db_params['database']} ENCODING 'UTF8';")
+            print(f"База данных {self.connection_manager.db_params['database']} создана.")
         except psycopg2.Error as e:
             print(str(e))
         finally:
             conn.close()
 
-    def connect(self) -> None:
-        """
-        Метод для подключения к базе данных
-        """
-        try:
-            self.conn = psycopg2.connect(**self.db_params)
-            self.conn.autocommit = True
-        except psycopg2.Error as e:
-            print(str(e))
 
-    def close_connection(self) -> None:
-        """
-        Метод для отключения от базы данных
-        """
-        if hasattr(self, "conn"):
-            self.conn.close()
+def ensure_connected(func):
+    def wrapper(self, *args, **kwargs):
+        if self.connection_manager.conn.closed != 0:
+            self.connection_manager.connect()
+        return func(self, *args, **kwargs)
+    return wrapper
+
+class CRUDTables:
+    """Класс для работы с таблицами базы банных"""
+
+    def __init__(self, connection_manager: ConnectionManager) -> None:
+        self.connection_manager = connection_manager
 
     def create_tables(self) -> None:
         """
         Метод для создания таблиц employers и vacancies
         """
         try:
-            with self.conn.cursor() as cur:
+            with self.connection_manager.get_connection().cursor() as cur:
                 cur.execute(
                     """
                     CREATE TABLE IF NOT EXISTS employers (
@@ -74,12 +89,14 @@ class DBManager(DBInteraction):
         except psycopg2.Error as e:
             print(str(e))
 
-    def insert_to_tables(self, obj: Vacancy) -> None:
+    @ensure_connected
+    def insert_into_tables(self, obj: Vacancy) -> None:
         """
         Метод для добавления данных в таблицы
         """
+        conn = self.connection_manager.get_connection()
         try:
-            with self.conn.cursor() as cur:
+            with conn.cursor() as cur:
                 # Начало транзакции
                 cur.execute("BEGIN;")
 
@@ -99,21 +116,30 @@ class DBManager(DBInteraction):
                             VALUES (%s, %s, %s, %s, %s, %s);
                             """, (obj.name, obj.salary, obj.description, obj.city, obj.url, obj.employer_id))
 
-                # Завершаем транзакцию
+                # Завершение транзакции
                 cur.execute("COMMIT;")
             print("Запись успешно добавлена.")
         except Exception as e:
-            # Отменяем транзакцию в случае ошибки
-            cur.execute("ROLLBACK;")
+            if conn.closed == 0:
+                conn.rollback()
+            else:
+                print("Соединение с базой данных было закрыто.")
             print(f"Произошла ошибка: {str(e)}")
+
+
+class DataAnalyzer:
+    """Метод для работы с данными таблиц базы данных"""
+    def __init__(self, connection_manager: ConnectionManager) -> None:
+        self.connection_manager = connection_manager
 
     def get_companies_and_vacancies_count(self) -> list:
         """
         Получает список всех компаний и количество вакансий у каждой компании.
         """
+
         result = []
         try:
-            with self.conn.cursor() as cur:
+            with self.connection_manager.get_connection().cursor() as cur:
                 # Выполняем запрос, который агрегирует количество вакансий по каждому работодателю
                 cur.execute("""
                             SELECT e.employer AS company_name, COUNT(v.id) AS vacancies_count
@@ -138,7 +164,7 @@ class DBManager(DBInteraction):
         """
         result = []
         try:
-            with self.conn.cursor() as cur:
+            with self.connection_manager.get_connection().cursor() as cur:
                 # Выполняем запрос, который объединяет таблицы vacancies и employers
                 cur.execute("""
                             SELECT e.employer, v.title, v.salary, v.url      
@@ -166,7 +192,7 @@ class DBManager(DBInteraction):
         count_valid_salaries = 0
 
         try:
-            with self.conn.cursor() as cur:
+            with self.connection_manager.get_connection().cursor() as cur:
                 # Получаем все вакансии из базы данных
                 cur.execute("""
                             SELECT v.title, 
@@ -211,7 +237,7 @@ class DBManager(DBInteraction):
         avg_salary = self.get_avg_salary()
 
         try:
-            with self.conn.cursor() as cur:
+            with self.connection_manager.get_connection().cursor() as cur:
                 cur.execute("""
                             SELECT v.title, 
                                    v.salary, 
@@ -244,7 +270,7 @@ class DBManager(DBInteraction):
         """
         result = []
         try:
-            with self.conn.cursor() as cur:
+            with self.connection_manager.get_connection().cursor() as cur:
                 # Используем регулярное выражение с регистронезависимым поиском
                 cur.execute("""
                             SELECT title, salary, url
@@ -259,20 +285,38 @@ class DBManager(DBInteraction):
             print(f"Ошибка при выполнении запроса: {str(e)}")
         return result
 
-    def read_table(self):
-        """
-        Метод для чтения таблицы
-        """
-        pass
 
-    def update_table(self):
-        """
-        Метод для обновления таблицы
-        """
-        pass
 
-    def clearing_table(self):
-        """
-        Метод для очистки таблицы
-        """
-        pass
+class DBManager:
+    def __init__(self, db_params: dict) -> None:
+        self.connection_manager = ConnectionManager(db_params)
+        self.crud_tables = CRUDTables(self.connection_manager)
+        self.data_analyzer = DataAnalyzer(self.connection_manager)
+
+    def initialize_database(self):
+        self.connection_manager.connect()
+        self.crud_tables.create_tables()
+
+    def finalize(self):
+        self.connection_manager.close_connection()
+
+    def insert_data(self, obj: Vacancy) -> None:
+        self.crud_tables.insert_into_tables(obj)
+
+    def get_companies_and_vacancies_count(self) -> list:
+        return self.data_analyzer.get_companies_and_vacancies_count()
+
+    def get_all_vacancies(self) -> list:
+        return self.data_analyzer.get_all_vacancies()
+
+    def get_avg_salary(self) -> float:
+        return self.data_analyzer.get_avg_salary()
+
+    def get_vacancies_with_higher_salary(self) -> list:
+        return self.data_analyzer.get_vacancies_with_higher_salary()
+
+    def get_vacancies_with_keyword(self, keyword) -> list:
+        return self.data_analyzer.get_vacancies_with_keyword(keyword)
+
+
+###############################################################################################

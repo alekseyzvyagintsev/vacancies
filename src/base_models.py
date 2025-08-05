@@ -30,41 +30,4 @@ class AbstractFileStorage:
         pass
 
 
-class DBInteraction(abc.ABC):
-    @abc.abstractmethod
-    def create_db(self) -> None:
-        """
-        Метод для создания базы данных
-        """
-        pass
-
-    @abc.abstractmethod
-    def create_tables(self) -> None:
-        """
-        Метод для создания таблицы
-        """
-        pass
-
-    @abc.abstractmethod
-    def read_table(self):
-        """
-        Метод для чтения таблицы
-        """
-        pass
-
-    @abc.abstractmethod
-    def update_table(self):
-        """
-        Метод для обновления таблицы
-        """
-        pass
-
-    @abc.abstractmethod
-    def clearing_table(self):
-        """
-        Метод для очистки таблицы
-        """
-        pass
-
-
 ########################################################################

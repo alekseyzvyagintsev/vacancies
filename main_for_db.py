@@ -20,14 +20,8 @@ db_params = {
 # Экземпляр класса для работы с базой данных
 dbm = DBManager(db_params)
 
-# Создаем базу данных
-dbm.create_db()
-
-# Подключаемся к базе данных
-dbm.connect()
-
-# Создаем таблицы
-dbm.create_tables()
+# Открываем соединение и создаем базу данных + таблицы
+dbm.initialize_database()
 
 # Экземпляр класса для работы с API сайтов с вакансиями
 hh_api = HeadHunterAPI()
@@ -73,7 +67,7 @@ def user_interaction():
         emp_vac_list = json_data.cast_to_object_list(employer_vacancies)
         # json_data.print_vacancies(emp_vac_list)
         for emp_vac in emp_vac_list:
-            dbm.insert_to_tables(emp_vac)
+            dbm.insert_data(emp_vac)
 
     while True:
         print(
@@ -124,7 +118,8 @@ def user_interaction():
         except ValueError:
             print("\nНекорректный ввод! Введите целое положительное число.")
 
-
+# Закрытие соединения с базой данных
+dbm.finalize()
 
 if __name__ == "__main__":
     try:
