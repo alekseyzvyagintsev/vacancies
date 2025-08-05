@@ -180,7 +180,7 @@ class DataAnalyzer:
                             )
                 rows = cur.fetchall()
                 for row in rows:
-                    result.append({"company": row[0], "job_title": row[1], "salary": row[2], "link": row[3]})
+                    result.append(f"{row[0]}, {row[1]} - {row[2]} ({row[3]})")
         except Exception as e:
             print(f"Ошибка при выполнении запроса: {str(e)}")
         return result
@@ -248,8 +248,8 @@ class DataAnalyzer:
                                    e.employer,
                                    e.employer_id,
                                    e.url
-                            FROM vacancies v
-                                     INNER JOIN employers e ON v.employer_id = e.employer_id
+                            FROM vacancies v, employers e
+                            WHERE v.employer_id = e.employer_id
                             ORDER BY e.employer ASC;
                             """
                             )
