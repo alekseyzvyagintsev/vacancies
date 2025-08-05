@@ -19,6 +19,9 @@ vacancy = Vacancy(
     "https://hh.ru/vacancy/123456",
     "Требования: опыт работы от 3 лет...",
     "Москва",
+    "employer",
+    "employer_id",
+    "vacancies_url",
 )
 
 

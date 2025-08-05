@@ -5,15 +5,18 @@ from src.logging_vacancy import logger
 
 
 class Vacancy:
-    __slots__ = ["name", "salary", "_url", "description", "city"]
+    __slots__ = ["name", "salary", "_url", "description", "city", "employer", "employer_id", "vacancies_url"]
 
-    def __init__(self, name, salary, url, description, city) -> None:
+    def __init__(self, name, salary, url, description, city, employer, employer_id, vacancies_url) -> None:
         self._validate_attributes(name, salary, url, description, city)
         self.name = name
         self.salary = salary
         self._url = url
         self.description = description
         self.city = city
+        self.employer = employer
+        self.employer_id = employer_id
+        self.vacancies_url = vacancies_url
 
     @property
     def url(self):
@@ -41,7 +44,10 @@ class Vacancy:
 
     def __str__(self) -> str:
         """Метод выводит информацию о вакансии в отформатированном виде"""
-        return f"{self.city}, {self.name}, {self.salary}, {self.url}, {self.description}"
+        return (
+            f"{self.city}, {self.name}, {self.salary}, {self.url}, {self.description}, "
+            f"{self.employer}, {self.employer_id}, {self.vacancies_url}"
+        )
 
     def __lt__(self, other):
         return self.average_salary() < other.average_salary()
@@ -70,6 +76,8 @@ class Vacancy:
                 return 0
         elif self.salary.isdigit():  # Если зарплата указана одним числом
             return float(self.salary)
+        else:
+            return 0
 
     def to_dict(self):
         return {
@@ -78,6 +86,9 @@ class Vacancy:
             "url": self.url,
             "description": self.description,
             "city": self.city,
+            "employer": self.employer,
+            "employer_id": self.employer_id,
+            "vacancies_url": self.vacancies_url,
         }
 
     @classmethod
