@@ -8,24 +8,28 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "click (==8.2.1)",
-    "coverage (==7.8.2)",
-    "pluggy (==1.6.0)",
-    "typing-extensions (==4.14.0rc1)"
+    "click (>=8.2.1)",
+    "coverage (>=7.8.2)",
+    "pluggy (>=1.6.0)",
+    "typing-extensions (>=4.14.0rc1)",
+    "dotenv (>=0.9.9,<0.10.0)",
+    "pytest-cov (>=6.2.1,<7.0.0)",
+    "psycopg2-binary (>=2.9.10,<3.0.0)"
 ]
 
 
 [build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
+requires = ["poetry-core>=3.0.0,<4.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+package-mode = false
 
 [tool.poetry.group.lint.dependencies]
 flake8 = "^7.1.1"
 black = "^25.1.0"
 isort = "^6.0.0"
 mypy = "^1.14.1"
-
-
 
 [tool.poetry.group.dev.dependencies]
 requests = "^2.32.3"
@@ -36,7 +40,7 @@ pytest-cov = "^6.0.0"
 disallow_untyped_defs = true
 no_implicit_optional = true
 warn_return_any = true
-exclude = 'venv'
+exclude = ['venv', '.venv', 'tests', '__pycache__']
 check_untyped_defs = true
 strict = true
 warn_unreachable = true

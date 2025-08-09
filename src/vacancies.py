@@ -154,12 +154,18 @@ class JSONSaver(AbstractFileStorage):
             if item.get("salary") is not None and (
                 item.get("salary", {}).get("from") is not None or item.get("salary", {}).get("to") is not None
             ):
-                salary = (
-                    f""
-                    f"{item.get('salary', {}).get('from')}-"
-                    f"{item.get('salary', {}).get('to')} "
-                    f"{item.get('salary', {}).get('currency')}."
+                # Назначаем нули там где None
+                salary_from = (
+                    item.get("salary", {}).get("from") if item.get("salary", {}).get("from") is not None else 0
                 )
+                salary_to = item.get("salary", {}).get("to") if item.get("salary", {}).get("to") is not None else 0
+                currency = (
+                    item.get("salary", {}).get("currency")
+                    if item.get("salary", {}).get("currency") is not None
+                    else ""
+                )
+
+                salary = f"{salary_from}-{salary_to} {currency}."
             else:
                 salary = "Зарплата не указана"
             # Проверяем есть ли описание. Если нет назначаем строку: "Описание не указано".
@@ -175,6 +181,9 @@ class JSONSaver(AbstractFileStorage):
                     url=item.get("alternate_url"),
                     description=description,
                     city=item.get("area", {}).get("name"),
+                    employer=item.get("employer", {}).get("name"),
+                    employer_id=item.get("employer", {}).get("id"),
+                    vacancies_url=item.get("employer", {}).get("vacancies_url"),
                 )
             )
         return result
