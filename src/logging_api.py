@@ -16,7 +16,10 @@ console_handler.setFormatter(formatter)
 console_handler.setLevel(logging.DEBUG)
 
 # Создание обработчика для записи в файл
-log_file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), f"logs/{__name__}.logs")
+log_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "logs")
+if not os.path.exists(log_dir):
+    os.makedirs(log_dir)
+log_file_path = os.path.join(log_dir, f"{__name__}.logs")
 file_handler = RotatingFileHandler(log_file_path, maxBytes=1024 * 1024 * 10, backupCount=5)
 file_handler.setFormatter(formatter)
 file_handler.setLevel(logging.WARNING)

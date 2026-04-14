@@ -10,11 +10,11 @@ from src.db_manager import DBManager
 load_dotenv(override=True)
 
 db_params = {
-    'host': os.getenv('HOST'),
-    'database': os.getenv('NAME'),
-    'user': os.getenv('USER'),
-    'password': os.getenv('PASSWORD'),
-    'port': os.getenv('PORT'),
+    'host': os.getenv('DB_HOST'),
+    'database': os.getenv('DB_NAME'),
+    'user': os.getenv('DB_USER'),
+    'password': os.getenv('DB_PASSWORD'),
+    'port': os.getenv('DB_PORT'),
 }
 
 # Экземпляр класса для работы с базой данных
