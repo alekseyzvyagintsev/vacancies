@@ -35,7 +35,7 @@ json_data = JSONSaver()
 def user_interaction():
 
     # Получение вакансий с hh.ru в формате JSON
-    profession = "разработчик"
+    profession = input("Укажите какие вакансии искать - ").strip()
     hh_vacancies = hh_api.get_vacancies(profession)
 
     # Преобразование набора данных из JSON в список объектов
