@@ -39,3 +39,39 @@
 ├── pyproject.toml            # Конфигурация зависимостей и инструментов
 └── README.md                 # Документация проекта
 ```
+
+## Технологии
+
+- Python 3.12+
+- `requests` — для работы с API
+- `psycopg2-binary` — для подключения к PostgreSQL
+- `dotenv` — для загрузки переменных окружения
+- `pytest`, `black`, `flake8`, `mypy` — для тестирования и форматирования кода
+
+## Запуск проекта
+
+1. Клонируйте репозиторий:
+   ```bash
+   git clone https://github.com/alekseyzvyagintsev/vacancies.git cd vacancies
+   ```
+
+2. Установите зависимости:
+   ```bash
+   poetry install
+   ```
+
+2. Настройте переменные окружения:
+   - Создайте файл `.env` на основе примера:
+   ```bash
+   cp .env.example .env
+   ```
+   - Отредактируйте файл `.env`, указав актуальные значения для вашей среды.
+
+3. Запустите приложение:
+   ```bash
+   python main_for_db.py
+   ```
+
+Разработчик: Alexey Zvyagintsev Email: alex0236889@gmail.com GitHub: https://github.com/alekseyzvyagintsev/vacancies
+
+Для вопросов, предложений или сообщений об ошибках, пожалуйста, свяжитесь с разработчиком по-указанному email, все предложения по улучшению приветствуются.
